@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сборник псалмов</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      padding-top: 20px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .search-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .collections {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .col-btn {
+      padding: 10px 8px;
+      border: 2px solid #D4AF8F;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: #8B7355;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .col-btn:hover {
+      background: #F5E6D3;
+    }
+
+    .col-btn.active {
+      background: #8B7355;
+      color: white;
+      border-color: #8B7355;
+    }
+
+    .search-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #8B7355;
+    }
+
+    button {
+      padding: 12px 24px;
+      background: #8B7355;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #6D5A47;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #E0E0E0;
+    }
+
+    .tab {
+      padding: 10px 0;
+      cursor: pointer;
+      font-weight: 600;
+      color: #999;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      color: #8B7355;
+      border-bottom-color: #8B7355;
+    }
+
+    .result {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      margin-bottom: 20px;
+    }
+
+    .psalm-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #8B7355;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .psalm-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #333;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin-bottom: 15px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .psalm-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 10px 16px;
+      background: #F5E6D3;
+      color: #8B7355;
+      border: 2px solid #D4AF8F;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+      background: #E8D4C0;
+    }
+
+    .action-btn.favorite {
+      background: #FFE5E5;
+      border-color: #FF6B6B;
+      color: #FF6B6B;
+    }
+
+    .action-btn.favorite.active {
+      background: #FF6B6B;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+      font-size: 16px;
+    }
+
+    .error {
+      background: #FFE5E5;
+      color: #FF6B6B;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .favorites-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .fav-item {
+      padding: 12px;
+      background: #F5E6D3;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .fav-item:hover {
+      background: #E8D4C0;
+    }
+
+    .fav-item-title {
+      font-weight: 600;
+      color: #8B7355;
+    }
+
+    .fav-item-desc {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .collections {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .psalm-actions {
+        flex-direction: column;
+      }
+
+      .action-btn {
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🙏 Сборник псалмов</h1>
+      <p>Поиск по номеру или названию</p>
+    </div>
+
+    <div class="search-section">
+      <div class="collections" id="collections"></div>
+      
+      <div class="search-input-group">
+        <input type="text" id="inp" placeholder="Номер или название..." autocomplete="off">
+        <button onclick="search()">Поиск</button>
+      </div>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('search')">Поиск</div>
+        <div class="tab" onclick="switchTab('favorites')">❤️ Избранное</div>
+      </div>
+    </div>
+
+    <div id="search-tab">
+      <div id="out" class="result">
+        <div class="loading">Введите номер или название...</div>
+      </div>
+    </div>
+
+    <div id="favorites-tab" style="display: none;">
+      <div id="favorites" class="result">
+        <div class="loading">Нет избранных псалмов</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://functions.yandexcloud.net/d4e02omtu989a7khj11n?psal=';
+    const FAV_KEY = 'favorites';
+    const COL_KEY = 'collection';
+    const CACHE_KEY = 'cache';
+    const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
+
+    const COLS = {
+      'п': { name: 'Песни Юности', max: 1005 },
+      'к': { name: 'Кувшинчик', max: 89 },
+      'н': { name: 'Новые псалмы', max: 217 },
+      'г': { name: 'Горлица', max: 571 },
+      'с': { name: 'Псалмы Сиона', max: 525 },
+      'м': { name: 'Мы поём Господу', max: 200 },
+      'юс': { name: 'Мелодия юных сердец', max: 850 },
+      'гх': { name: 'Голосок хваления', max: 393 }
+    };
+
+    let currentCol = localStorage.getItem(COL_KEY) || 'п';
+    let currentPsalm = null;
+
+    function init() {
+      renderCollections();
+      loadFavorites();
+      document.getElementById('inp').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') search();
+      });
+    }
+
+    function renderCollections() {
+      const html = Object.entries(COLS).map(([key, col]) => `
+        <button class="col-btn ${key === currentCol ? 'active' : ''}" onclick="selectCollection('${key}')">
+          ${key}
+        </button>
+      `).join('');
+      document.getElementById('collections').innerHTML = html;
+    }
+
+    function selectCollection(col) {
+      currentCol = col;
+      localStorage.setItem(COL_KEY, col);
+      renderCollections();
+      document.getElementById('inp').value = '';
+      document.getElementById('out').innerHTML = '<div class="loading">Введите номер или название...</div>';
+    }
+
+    async function search() {
+      const query = document.getElementById('inp').value.trim();
+      if (!query) return;
+
+      document.getElementById('out').innerHTML = '<div class="loading">Загрузка...</div>';
+
+      try {
+        const num = parseInt(query);
+        if (!isNaN(num) && num > 0) {
+          const col = COLS[currentCol];
+          if (num > col.max) {
+            document.getElementById('out').innerHTML = `<div class="error">❌ Номер должен быть от 1 до ${col.max}</div>`;
+            return;
+          }
+          await loadAndShowPsalm(currentCol, num);
+        } else {
+          await searchByName(query);
+        }
+      } catch (err) {
+        document.getElementById('out').innerHTML = `<div class="error">❌ Ошибка: ${err.message}</div>`;
+      }
+    }
+
+    async function loadAndShowPsalm(col, num) {
+      try {
+        const html = await loadPsalm(col, num);
+        const { title, text } = parsePsalm(html);
+        currentPsalm = { col, num, title, text };
+        showPsalm(title, text);
+      } catch (err) {
+        document.getElementById('out').innerHTML = `<div class="error">❌ Ошибка загрузки: ${err.message}</div>`;
+      }
+    }
+
+    async function loadPsalm(col, num) {
+      const cacheKey = `${col}:${num}`;
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const cache = JSON.parse(cached);
+        if (cache[cacheKey] && Date.now() - cache[cacheKey].time < CACHE_TTL) {
+          return cache[cacheKey].data;
+        }
+      }
+
+      const prefix = col === 'п' ? 'p' : col;
+      const response = await fetch(`${API}${prefix}${num}`);
+      if (!response.ok) throw new Error('Псалм не найден');
+      const html = await response.text();
+
+      const cache = cached ? JSON.parse(cached) : {};
+      cache[cacheKey] = { data: html, time: Date.now() };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+
+      return html;
+    }
+
+    function parsePsalm(html) {
+      html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+      html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+      html = html.replace(/<div[^>]*class="[^"]*controls[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
+      html = html.replace(/<div[^>]*class="[^"]*font[^"]*"[^>]*>[\s\S]*?<\/div>/gi, '');
+      
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      let text = tmp.textContent || tmp.innerText || '';
+      
+      text = text.replace(/\s+/g, ' ').trim();
+      
+      const lines = text.split(/[.\n]/);
+      let title = lines[0].trim();
+      
+      const verseMatch = text.match(/(\d+\.\s+.+?)(?=\d+\.|$)/gs);
+      let cleanText = verseMatch ? verseMatch.join('\n\n') : text;
+      
+      if (cleanText.length < 100) {
+        cleanText = text;
+      }
+      
+      return { title, text: cleanText };
+    }
+
+    async function searchByName(query) {
+      const results = [];
+      
+      for (const [col, colInfo] of Object.entries(COLS)) {
+        for (let n = 1; n <= Math.min(50, colInfo.max); n++) {
+          try {
+            const html = await loadPsalm(col, n);
+            const { title } = parsePsalm(html);
+            if (title.toLowerCase().includes(query.toLowerCase())) {
+              results.push({ col, num: n, title });
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (results.length === 0) {
+        document.getElementById('out').innerHTML = `<div class="error">❌ Псалмы с названием "${query}" не найдены</div>`;
+      } else if (results.length === 1) {
+        await loadAndShowPsalm(results[0].col, results[0].num);
+      } else {
+        const html = `
+          <div class="result">
+            <div style="font-weight: 600; margin-bottom: 15px;">Найдено ${results.length} псалмов:</div>
+            <div class="favorites-list">
+              ${results.map(r => `
+                <div class="fav-item" onclick="loadAndShowPsalm('${r.col}', ${r.num})">
+                  <div class="fav-item-title">${r.title}</div>
+                  <div class="fav-item-desc">${COLS[r.col].name} ${r.num}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        document.getElementById('out').innerHTML = html;
+      }
+    }
+
+    function showPsalm(title, text) {
+      const favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+      const isFav = favs.some(f => f.col === currentPsalm.col && f.num === currentPsalm.num);
+      
+      const html = `
+        <div class="psalm-title">
+          <span>${title}</span>
+        </div>
+        <div class="psalm-text">${text}</div>
+        <div class="psalm-actions">
+          <button class="action-btn favorite ${isFav ? 'active' : ''}" onclick="toggleFavorite()">
+            ${isFav ? '❤️ В избранном' : '🤍 Добавить'}
+          </button>
+          <button class="action-btn" onclick="copyText()">📋 Копировать</button>
+        </div>
+      `;
+      document.getElementById('out').innerHTML = html;
+    }
+
+    function toggleFavorite() {
+      if (!currentPsalm) return;
+      
+      const favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+      const idx = favs.findIndex(f => f.col === currentPsalm.col && f.num === currentPsalm.num);
+      
+      if (idx >= 0) {
+        favs.splice(idx, 1);
+      } else {
+        favs.push({
+          col: currentPsalm.col,
+          num: currentPsalm.num,
+          title: currentPsalm.title
+        });
+      }
+      
+      localStorage.setItem(FAV_KEY, JSON.stringify(favs));
+      showPsalm(currentPsalm.title, currentPsalm.text);
+      loadFavorites();
+    }
+
+    function copyText() {
+      if (!currentPsalm) return;
+      navigator.clipboard.writeText(currentPsalm.text).then(() => {
+        alert('✅ Скопировано в буфер обмена');
+      });
+    }
+
+    function loadFavorites() {
+      const favs = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+      
+      if (favs.length === 0) {
+        document.getElementById('favorites').innerHTML = '<div class="loading">Нет избранных псалмов</div>';
+      } else {
+        const html = `
+          <div class="favorites-list">
+            ${favs.map(f => `
+              <div class="fav-item" onclick="loadAndShowPsalm('${f.col}', ${f.num})">
+                <div class="fav-item-title">${f.title}</div>
+                <div class="fav-item-desc">${COLS[f.col].name} ${f.num}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        document.getElementById('favorites').innerHTML = html;
+      }
+    }
+
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('search-tab').style.display = tab === 'search' ? 'block' : 'none';
+      document.getElementById('favorites-tab').style.display = tab === 'favorites' ? 'block' : 'none';
+
+      if (tab === 'favorites') {
+        loadFavorites();
+      }
+    }
+
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
