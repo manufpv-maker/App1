@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сборник Псалмов</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .app {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    /* Экран сборников */
+    .collections-screen {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .collection-card {
+      background: white;
+      border: 2px solid #E0E0E0;
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .collection-card:hover {
+      border-color: #8B7355;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .collection-card.active {
+      background: #8B7355;
+      color: white;
+      border-color: #8B7355;
+    }
+
+    .collection-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .collection-name {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .collection-count {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    /* Экран Psalm-Liste */
+    .psalms-screen {
+      display: none;
+    }
+
+    .psalms-screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .back-button {
+      background: #8B7355;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-bottom: 15px;
+      transition: background 0.3s ease;
+    }
+
+    .back-button:hover {
+      background: #6B5345;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 2px solid #E0E0E0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #8B7355;
+    }
+
+    .psalms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .psalm-item {
+      background: white;
+      border: 1px solid #E0E0E0;
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .psalm-item:hover {
+      background: #F5F5F5;
+      border-color: #8B7355;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .psalm-info {
+      flex: 1;
+    }
+
+    .psalm-number {
+      font-weight: 600;
+      color: #8B7355;
+      font-size: 14px;
+    }
+
+    .psalm-title {
+      font-size: 16px;
+      color: #333;
+      margin-top: 5px;
+    }
+
+    .psalm-arrow {
+      color: #8B7355;
+      font-size: 20px;
+    }
+
+    /* Экран Psalm-Detail */
+    .detail-screen {
+      display: none;
+    }
+
+    .detail-screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .detail-header {
+      background: #F5E6D3;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .detail-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #8B7355;
+      margin-bottom: 5px;
+    }
+
+    .detail-number {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .detail-text {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #E0E0E0;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 15px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .detail-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .detail-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-copy {
+      background: #8B7355;
+      color: white;
+    }
+
+    .btn-copy:hover {
+      background: #6B5345;
+    }
+
+    .btn-back {
+      background: #E0E0E0;
+      color: #333;
+    }
+
+    .btn-back:hover {
+      background: #D0D0D0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+
+    .error {
+      background: #FFE0E0;
+      color: #C00;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #FF9999;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      z-index: 1000;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #8B7355;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>📖 Сборник Псалмов</h1>
+      <p>Выберите сборник и найдите нужный псалм</p>
+    </div>
+
+    <div class="content">
+      <!-- Экран сборников -->
+      <div id="collectionsScreen" class="collections-screen active">
+        <div class="collection-card" data-collection="п">
+          <div class="collection-icon">🎵</div>
+          <div class="collection-name">Песни Юности</div>
+          <div class="collection-count">1005 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="к">
+          <div class="collection-icon">🎶</div>
+          <div class="collection-name">Кувшинчик</div>
+          <div class="collection-count">89 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="н">
+          <div class="collection-icon">✨</div>
+          <div class="collection-name">Новые псалмы</div>
+          <div class="collection-count">217 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="г">
+          <div class="collection-icon">🕊️</div>
+          <div class="collection-name">Горлица</div>
+          <div class="collection-count">571 псалм</div>
+        </div>
+        <div class="collection-card" data-collection="с">
+          <div class="collection-icon">🏔️</div>
+          <div class="collection-name">Псалмы Сиона</div>
+          <div class="collection-count">525 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="м">
+          <div class="collection-icon">🎤</div>
+          <div class="collection-name">Мы поём Господу</div>
+          <div class="collection-count">200 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="юс">
+          <div class="collection-icon">💫</div>
+          <div class="collection-name">Мелодия юных сердец</div>
+          <div class="collection-count">850 псалмов</div>
+        </div>
+        <div class="collection-card" data-collection="гх">
+          <div class="collection-icon">🎼</div>
+          <div class="collection-name">Голосок хваления</div>
+          <div class="collection-count">393 псалма</div>
+        </div>
+      </div>
+
+      <!-- Экран Psalm-Liste -->
+      <div id="psalmsScreen" class="psalms-screen">
+        <button class="back-button" id="backFromPsalms">← Назад</button>
+        <div class="search-box">
+          <input type="text" id="psalmSearch" placeholder="Поиск по названию или номеру...">
+        </div>
+        <div id="psalmsList" class="psalms-list"></div>
+      </div>
+
+      <!-- Экран Psalm-Detail -->
+      <div id="detailScreen" class="detail-screen">
+        <button class="back-button" id="backFromDetail">← Назад</button>
+        <div class="detail-header">
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-number" id="detailNumber"></div>
+        </div>
+        <div id="detailText" class="detail-text"></div>
+        <div class="detail-buttons">
+          <button class="btn-copy" id="copyButton">📋 Копировать</button>
+          <button class="btn-back" id="backFromDetail2">← Назад</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Lade Psalmen-Daten mit Lazy Loading
+    let collectionsData = {};
+    let currentCollection = null;
+    let currentPsalm = null;
+
+    async function loadCollectionData(abbr) {
+      if (collectionsData[abbr]) {
+        return collectionsData[abbr];
+      }
+
+      try {
+        const response = await fetch(`psalms-split/${abbr}.json.gz`);
+        if (!response.ok) throw new Error('Failed to load');
+        
+        const buffer = await response.arrayBuffer();
+        const decompressed = await decompressGzip(buffer);
+        const text = new TextDecoder().decode(decompressed);
+        const data = JSON.parse(text);
+        
+        collectionsData[abbr] = data.psalms;
+        return data.psalms;
+      } catch (err) {
+        console.error(`Fehler beim Laden von ${abbr}:`, err);
+        showError(`Fehler beim Laden der Sammlung`);
+        return [];
+      }
+    }
+
+    // Gzip Decompression
+    async function decompressGzip(buffer) {
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array(buffer));
+          controller.close();
+        }
+      });
+      
+      const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
+      const reader = decompressedStream.getReader();
+      const chunks = [];
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const result = new Uint8Array(totalLength);
+      let offset = 0;
+      
+      for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      return result;
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.collections-screen, .psalms-screen, .detail-screen').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    async function renderPsalmsList(abbr, filter = '') {
+      const psalmsList = document.getElementById('psalmsList');
+      psalmsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Загрузка...</div>';
+
+      const psalms = await loadCollectionData(abbr);
+      
+      const filtered = filter.trim() === '' ? psalms : psalms.filter(p => {
+        const query = filter.toLowerCase();
+        return p.number.toString().includes(query) || p.title.toLowerCase().includes(query);
+      });
+
+      psalmsList.innerHTML = '';
+
+      if (filtered.length === 0) {
+        psalmsList.innerHTML = '<div class="error">Ничего не найдено</div>';
+        return;
+      }
+
+      filtered.forEach(psalm => {
+        const item = document.createElement('div');
+        item.className = 'psalm-item';
+        item.innerHTML = `
+          <div class="psalm-info">
+            <div class="psalm-number">${psalm.collection}${psalm.number}</div>
+            <div class="psalm-title">${psalm.title}</div>
+          </div>
+          <div class="psalm-arrow">›</div>
+        `;
+        item.addEventListener('click', () => showPsalmDetail(psalm));
+        psalmsList.appendChild(item);
+      });
+    }
+
+    function showPsalmDetail(psalm) {
+      currentPsalm = psalm;
+      document.getElementById('detailTitle').textContent = psalm.title;
+      document.getElementById('detailNumber').textContent = `${psalm.collection}${psalm.number}`;
+      document.getElementById('detailText').textContent = psalm.text;
+      showScreen('detailScreen');
+    }
+
+    function copyToClipboard() {
+      if (!currentPsalm) return;
+      const text = `${currentPsalm.collection}${currentPsalm.number}. ${currentPsalm.title}\n\n${currentPsalm.text}`;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✅ Копировано!');
+      }).catch(err => {
+        console.error('Ошибка при копировании:', err);
+      });
+    }
+
+    function showError(message) {
+      const content = document.querySelector('.content');
+      const error = document.createElement('div');
+      error.className = 'error';
+      error.textContent = message;
+      content.insertBefore(error, content.firstChild);
+    }
+
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.collection-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const abbr = card.dataset.collection;
+        currentCollection = abbr;
+        renderPsalmsList(abbr);
+        showScreen('psalmsScreen');
+      });
+    });
+
+    document.getElementById('backFromPsalms').addEventListener('click', () => {
+      showScreen('collectionsScreen');
+    });
+
+    document.getElementById('psalmSearch').addEventListener('input', (e) => {
+      if (currentCollection) {
+        renderPsalmsList(currentCollection, e.target.value);
+      }
+    });
+
+    document.getElementById('copyButton').addEventListener('click', copyToClipboard);
+    document.getElementById('backFromDetail').addEventListener('click', () => {
+      renderPsalmsList(currentCollection);
+      showScreen('psalmsScreen');
+    });
+    document.getElementById('backFromDetail2').addEventListener('click', () => {
+      renderPsalmsList(currentCollection);
+      showScreen('psalmsScreen');
+    });
+  </script>
+</body>
+</html>

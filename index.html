@@ -51,7 +51,7 @@
       padding: 20px;
     }
 
-    /* Экран коллекций */
+    /* Экран сборников */
     .collections-screen {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -228,6 +228,8 @@
       font-size: 16px;
       color: #333;
       margin-bottom: 15px;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
     .detail-buttons {
@@ -301,17 +303,32 @@
         opacity: 1;
       }
     }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #8B7355;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="app">
-      <div class="header">
+    <div class="header">
       <h1>📖 Сборник Псалмов</h1>
       <p>Выберите сборник и найдите нужный псалм</p>
     </div>
 
     <div class="content">
-      <!-- Экран коллекций -->
+      <!-- Экран сборников -->
       <div id="collectionsScreen" class="collections-screen active">
         <div class="collection-card" data-collection="п">
           <div class="collection-icon">🎵</div>
@@ -381,21 +398,63 @@
   </div>
 
   <script>
-    // Lade Psalmen-Daten
-    let psalmsData = [];
+    // Lade Psalmen-Daten mit Lazy Loading
+    let collectionsData = {};
     let currentCollection = null;
     let currentPsalm = null;
 
-    async function loadPsalmsData() {
-      try {
-        const response = await fetch('psalms-data.json');
-        const data = await response.json();
-        psalmsData = data.psalms;
-        console.log(`✅ ${psalmsData.length} Psalmen geladen`);
-      } catch (err) {
-        console.error('❌ Fehler beim Laden:', err);
-        showError('Fehler beim Laden der Psalmen-Daten');
+    async function loadCollectionData(abbr) {
+      if (collectionsData[abbr]) {
+        return collectionsData[abbr];
       }
+
+      try {
+        const response = await fetch(`psalms-split/${abbr}.json.gz`);
+        if (!response.ok) throw new Error('Failed to load');
+        
+        const buffer = await response.arrayBuffer();
+        const decompressed = await decompressGzip(buffer);
+        const text = new TextDecoder().decode(decompressed);
+        const data = JSON.parse(text);
+        
+        collectionsData[abbr] = data.psalms;
+        return data.psalms;
+      } catch (err) {
+        console.error(`Fehler beim Laden von ${abbr}:`, err);
+        showError(`Fehler beim Laden der Sammlung`);
+        return [];
+      }
+    }
+
+    // Gzip Decompression
+    async function decompressGzip(buffer) {
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(new Uint8Array(buffer));
+          controller.close();
+        }
+      });
+      
+      const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
+      const reader = decompressedStream.getReader();
+      const chunks = [];
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      
+      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+      const result = new Uint8Array(totalLength);
+      let offset = 0;
+      
+      for (const chunk of chunks) {
+        result.set(chunk, offset);
+        offset += chunk.length;
+      }
+      
+      return result;
     }
 
     function showScreen(screenId) {
@@ -405,22 +464,21 @@
       document.getElementById(screenId).classList.add('active');
     }
 
-    function getPsalmsByCollection(abbr) {
-      return psalmsData.filter(p => p.collection === abbr).sort((a, b) => a.number - b.number);
-    }
+    async function renderPsalmsList(abbr, filter = '') {
+      const psalmsList = document.getElementById('psalmsList');
+      psalmsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Загрузка...</div>';
 
-    function renderPsalmsList(abbr, filter = '') {
-      const psalms = getPsalmsByCollection(abbr);
+      const psalms = await loadCollectionData(abbr);
+      
       const filtered = filter.trim() === '' ? psalms : psalms.filter(p => {
         const query = filter.toLowerCase();
         return p.number.toString().includes(query) || p.title.toLowerCase().includes(query);
       });
 
-      const psalmsList = document.getElementById('psalmsList');
       psalmsList.innerHTML = '';
 
       if (filtered.length === 0) {
-        psalmsList.innerHTML = '<div class="error">Keine Psalmen gefunden</div>';
+        psalmsList.innerHTML = '<div class="error">Ничего не найдено</div>';
         return;
       }
 
@@ -451,9 +509,9 @@
       if (!currentPsalm) return;
       const text = `${currentPsalm.collection}${currentPsalm.number}. ${currentPsalm.title}\n\n${currentPsalm.text}`;
       navigator.clipboard.writeText(text).then(() => {
-        showToast('✅ Kopiert!');
+        showToast('✅ Копировано!');
       }).catch(err => {
-        console.error('Fehler beim Kopieren:', err);
+        console.error('Ошибка при копировании:', err);
       });
     }
 
@@ -502,9 +560,6 @@
       renderPsalmsList(currentCollection);
       showScreen('psalmsScreen');
     });
-
-    // Initialisierung
-    window.addEventListener('load', loadPsalmsData);
   </script>
 </body>
 </html>
