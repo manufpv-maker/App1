@@ -1,0 +1,5 @@
+node_modules/
+raw.json
+data/*.json
+!data/*.json.gz
+!data/*.json.br

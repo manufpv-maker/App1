@@ -27,9 +27,10 @@
 ## Структура
 
 - `index.html` — всё приложение (HTML, CSS, JS)
-- `data/index.json` — номера, названия и первые строки всех псалмов
-- `data/<код>.json` — тексты одного сборника; рядом `.json.gz`, сервер отдаёт их сжатыми
-- `server.js` — Express-сервер
+- `data/index.json.gz/.br` — номера, названия и первые строки всех псалмов
+- `data/<код>.json.gz` и `.json.br` — тексты одного сборника, заранее сжатые (gzip и brotli)
+- `server.js` — сервер без зависимостей: при старте читает все файлы в память и отдаёт их сжатыми, с ETag и кэшем
+- `railway.json` — настройки Railway (Dockerfile, healthcheck `/health`, перезапуск при сбое)
 - `tools/` — скрипты для обновления текстов из исходной базы
 
 ## Обновление текстов
@@ -37,14 +38,15 @@
 ```bash
 python3 tools/scrape.py raw.json
 python3 tools/build.py raw.json data
-for f in data/*.json; do gzip -9 -k -f "$f"; done
+node tools/compress.js
 ```
 
 ## Запуск
 
 ```bash
-npm install
 npm start
 ```
+
+Зависимостей нет, `npm install` не нужен.
 
 Приложение будет доступно на http://localhost:8080
