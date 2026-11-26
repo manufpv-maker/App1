@@ -1,565 +1,615 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Сборник Псалмов</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
-      min-height: 100vh;
-      color: #333;
-    }
-
-    .app {
-      max-width: 600px;
-      margin: 0 auto;
-      background: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .header {
-      background: linear-gradient(135deg, #8B7355 0%, #A0826D 100%);
-      color: white;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .header h1 {
-      font-size: 28px;
-      margin-bottom: 5px;
-    }
-
-    .header p {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
-
-    /* Экран сборников */
-    .collections-screen {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .collection-card {
-      background: white;
-      border: 2px solid #E0E0E0;
-      border-radius: 12px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .collection-card:hover {
-      border-color: #8B7355;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-
-    .collection-card.active {
-      background: #8B7355;
-      color: white;
-      border-color: #8B7355;
-    }
-
-    .collection-icon {
-      font-size: 32px;
-      margin-bottom: 10px;
-    }
-
-    .collection-name {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .collection-count {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-
-    /* Экран Psalm-Liste */
-    .psalms-screen {
-      display: none;
-    }
-
-    .psalms-screen.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .back-button {
-      background: #8B7355;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-bottom: 15px;
-      transition: background 0.3s ease;
-    }
-
-    .back-button:hover {
-      background: #6B5345;
-    }
-
-    .search-box {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-
-    .search-box input {
-      flex: 1;
-      padding: 12px 16px;
-      border: 2px solid #E0E0E0;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: border-color 0.3s ease;
-    }
-
-    .search-box input:focus {
-      outline: none;
-      border-color: #8B7355;
-    }
-
-    .psalms-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .psalm-item {
-      background: white;
-      border: 1px solid #E0E0E0;
-      border-radius: 8px;
-      padding: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .psalm-item:hover {
-      background: #F5F5F5;
-      border-color: #8B7355;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .psalm-info {
-      flex: 1;
-    }
-
-    .psalm-number {
-      font-weight: 600;
-      color: #8B7355;
-      font-size: 14px;
-    }
-
-    .psalm-title {
-      font-size: 16px;
-      color: #333;
-      margin-top: 5px;
-    }
-
-    .psalm-arrow {
-      color: #8B7355;
-      font-size: 20px;
-    }
-
-    /* Экран Psalm-Detail */
-    .detail-screen {
-      display: none;
-    }
-
-    .detail-screen.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .detail-header {
-      background: #F5E6D3;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-
-    .detail-title {
-      font-size: 20px;
-      font-weight: 600;
-      color: #8B7355;
-      margin-bottom: 5px;
-    }
-
-    .detail-number {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .detail-text {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #E0E0E0;
-      line-height: 1.8;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 15px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .detail-buttons {
-      display: flex;
-      gap: 10px;
-    }
-
-    .detail-buttons button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .btn-copy {
-      background: #8B7355;
-      color: white;
-    }
-
-    .btn-copy:hover {
-      background: #6B5345;
-    }
-
-    .btn-back {
-      background: #E0E0E0;
-      color: #333;
-    }
-
-    .btn-back:hover {
-      background: #D0D0D0;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-    }
-
-    .error {
-      background: #FFE0E0;
-      color: #C00;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #FF9999;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      z-index: 1000;
-      animation: slideUp 0.3s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateX(-50%) translateY(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #8B7355;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eef0f6">
+<meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <h1>📖 Сборник Псалмов</h1>
-      <p>Выберите сборник и найдите нужный псалм</p>
-    </div>
+<title>Сборник псалмов</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: iOS navigation stack — Home → Collection → Psalm — each a full screen that slides over the last; glass bars float above content. */
+:root{
+  --bg:#eef0f6; --fg:#0b0d12; --muted:rgba(60,60,67,.62); --sep:rgba(60,60,67,.16);
+  --accent:#0071e3; --chorus:#8b3fb0; --hl:rgba(255,204,0,.38);
+  --glass:rgba(255,255,255,.52); --glass-strong:rgba(255,255,255,.74); --glass-edge:rgba(255,255,255,.75); --glass-hi:rgba(255,255,255,.9); --glass-lo:rgba(255,255,255,.25);
+  --material:rgba(255,255,255,.66); --shadow:rgba(20,24,40,.16); --dim:rgba(0,0,0,.08);
+  --b1:#9cc3ff; --b2:#f7b6d2; --b3:#b8f0d6; --b4:#ffd9a8;
+  --c-k:#e0603a; --c-n:#22a06b; --c-g:#3b6fe0; --c-p:#9b59d0; --c-s:#d99a10; --c-m:#119bab; --c-ys:#e04880; --c-gh:#6f9a1c;
+  --f-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter",system-ui,"Segoe UI",Roboto,sans-serif;
+  --f-serif:ui-serif,"New York","Literata","PT Serif",Georgia,serif;
+  --spring:cubic-bezier(.32,.72,0,1); --nav-h:52px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#05060a; --fg:#f5f5f7; --muted:rgba(235,235,245,.6); --sep:rgba(84,84,88,.45);
+  --accent:#0a84ff; --chorus:#d7a6f2; --hl:rgba(255,214,10,.3);
+  --glass:rgba(38,40,48,.46); --glass-strong:rgba(30,31,38,.72); --glass-edge:rgba(255,255,255,.14); --glass-hi:rgba(255,255,255,.22); --glass-lo:rgba(255,255,255,.04);
+  --material:rgba(28,29,35,.62); --shadow:rgba(0,0,0,.5); --dim:rgba(0,0,0,.35);
+  --b1:#1d3f8a; --b2:#6a1f4a; --b3:#0f5a48; --b4:#6b4210;
+  --c-k:#ff8a65; --c-n:#4fd19a; --c-g:#7fa2ff; --c-p:#c99af0; --c-s:#f5c04a; --c-m:#4fd0de; --c-ys:#ff7aa8; --c-gh:#a8d14f;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#05060a; --fg:#f5f5f7; --muted:rgba(235,235,245,.6); --sep:rgba(84,84,88,.45);
+  --accent:#0a84ff; --chorus:#d7a6f2; --hl:rgba(255,214,10,.3);
+  --glass:rgba(38,40,48,.46); --glass-strong:rgba(30,31,38,.72); --glass-edge:rgba(255,255,255,.14); --glass-hi:rgba(255,255,255,.22); --glass-lo:rgba(255,255,255,.04);
+  --material:rgba(28,29,35,.62); --shadow:rgba(0,0,0,.5); --dim:rgba(0,0,0,.35);
+  --b1:#1d3f8a; --b2:#6a1f4a; --b3:#0f5a48; --b4:#6b4210;
+  --c-k:#ff8a65; --c-n:#4fd19a; --c-g:#7fa2ff; --c-p:#c99af0; --c-s:#f5c04a; --c-m:#4fd0de; --c-ys:#ff7aa8; --c-gh:#a8d14f;
+  color-scheme:dark}
 
-    <div class="content">
-      <!-- Экран сборников -->
-      <div id="collectionsScreen" class="collections-screen active">
-        <div class="collection-card" data-collection="п">
-          <div class="collection-icon">🎵</div>
-          <div class="collection-name">Песни Юности</div>
-          <div class="collection-count">1005 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="к">
-          <div class="collection-icon">🎶</div>
-          <div class="collection-name">Кувшинчик</div>
-          <div class="collection-count">89 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="н">
-          <div class="collection-icon">✨</div>
-          <div class="collection-name">Новые псалмы</div>
-          <div class="collection-count">217 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="г">
-          <div class="collection-icon">🕊️</div>
-          <div class="collection-name">Горлица</div>
-          <div class="collection-count">571 псалм</div>
-        </div>
-        <div class="collection-card" data-collection="с">
-          <div class="collection-icon">🏔️</div>
-          <div class="collection-name">Псалмы Сиона</div>
-          <div class="collection-count">525 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="м">
-          <div class="collection-icon">🎤</div>
-          <div class="collection-name">Мы поём Господу</div>
-          <div class="collection-count">200 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="юс">
-          <div class="collection-icon">💫</div>
-          <div class="collection-name">Мелодия юных сердец</div>
-          <div class="collection-count">850 псалмов</div>
-        </div>
-        <div class="collection-card" data-collection="гх">
-          <div class="collection-icon">🎼</div>
-          <div class="collection-name">Голосок хваления</div>
-          <div class="collection-count">393 псалма</div>
-        </div>
-      </div>
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);font-size:16px;overflow:hidden;-webkit-font-smoothing:antialiased;letter-spacing:-.011em}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
 
-      <!-- Экран Psalm-Liste -->
-      <div id="psalmsScreen" class="psalms-screen">
-        <button class="back-button" id="backFromPsalms">← Назад</button>
-        <div class="search-box">
-          <input type="text" id="psalmSearch" placeholder="Поиск по названию или номеру...">
-        </div>
-        <div id="psalmsList" class="psalms-list"></div>
-      </div>
+/* ---------- liquid glass ---------- */
+.glass{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(1.9);backdrop-filter:blur(22px) saturate(1.9);
+  box-shadow:inset 0 0 0 .5px var(--glass-edge),inset 0 1px 0 var(--glass-hi),inset 0 -1px 0 var(--glass-lo),0 12px 32px -12px var(--shadow)}
+.glass::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(120% 80% at var(--mx,30%) var(--my,0%),var(--glass-hi),transparent 55%),linear-gradient(180deg,transparent 60%,var(--glass-lo));opacity:.55;transition:opacity .3s}
+.press{transition:transform .45s var(--spring),background-color .2s}
+.press:active{transform:scale(.96);transition-duration:.12s}
 
-      <!-- Экран Psalm-Detail -->
-      <div id="detailScreen" class="detail-screen">
-        <button class="back-button" id="backFromDetail">← Назад</button>
-        <div class="detail-header">
-          <div class="detail-title" id="detailTitle"></div>
-          <div class="detail-number" id="detailNumber"></div>
-        </div>
-        <div id="detailText" class="detail-text"></div>
-        <div class="detail-buttons">
-          <button class="btn-copy" id="copyButton">📋 Копировать</button>
-          <button class="btn-back" id="backFromDetail2">← Назад</button>
-        </div>
-      </div>
-    </div>
+/* ---------- navigation stack ---------- */
+.screen{position:fixed;inset:0;overflow:hidden;background:var(--bg);transition:transform .55s var(--spring);will-change:transform;contain:layout paint}
+.screen::before{content:"";position:absolute;inset:-20%;pointer-events:none;z-index:0;
+  background:radial-gradient(38% 32% at 18% 12%,var(--b1),transparent 70%),radial-gradient(34% 30% at 88% 20%,var(--b2),transparent 70%),radial-gradient(40% 34% at 70% 88%,var(--b3),transparent 70%),radial-gradient(30% 28% at 10% 80%,var(--b4),transparent 70%);
+  opacity:.75;animation:drift 38s ease-in-out infinite alternate}
+#sRead::before{opacity:.32}
+.screen::after{content:"";position:absolute;inset:0;background:var(--dim);opacity:0;pointer-events:none;transition:opacity .55s var(--spring);z-index:30}
+.screen.right{transform:translateX(100%)}
+.screen.under{transform:translateX(-28%)}
+.screen.under::after{opacity:1}
+.screen.active,.screen.right{box-shadow:-18px 0 40px -18px var(--shadow)}
+#sHome{z-index:1} #sList{z-index:2} #sRead{z-index:3}
+.noanim .screen,.noanim .screen::after{transition:none!important}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(3%,-2%,0) scale(1.06)}100%{transform:translate3d(-3%,2%,0) scale(1.02)}}
+
+.scroller{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;z-index:1;-webkit-overflow-scrolling:touch}
+.content{max-width:760px;margin:0 auto;padding:calc(var(--nav-h) + env(safe-area-inset-top,0px) + 4px) max(16px,env(safe-area-inset-right,0px)) calc(120px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+
+.nav{position:absolute;top:0;left:0;right:0;z-index:20;padding:env(safe-area-inset-top,0px) max(8px,env(safe-area-inset-right,0px)) 0 max(8px,env(safe-area-inset-left,0px))}
+.nav::before{content:"";position:absolute;inset:0;background:var(--glass-strong);-webkit-backdrop-filter:blur(24px) saturate(1.9);backdrop-filter:blur(24px) saturate(1.9);box-shadow:0 .5px 0 var(--sep);opacity:0;transition:opacity .3s}
+.scrolled .nav::before{opacity:1}
+.nav-in{position:relative;height:var(--nav-h);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;max-width:1000px;margin:0 auto}
+.nav-title{font-weight:600;font-size:17px;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .35s var(--spring);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw;text-align:center}
+.scrolled .nav-title{opacity:1;transform:none}
+.nav-l{justify-self:start;min-width:0;display:flex}
+.nav-r{justify-self:end;display:flex;gap:6px}
+.back{display:flex;align-items:center;gap:2px;color:var(--accent);font-size:17px;padding:8px 10px 8px 4px;border-radius:999px;min-width:0;max-width:40vw}
+.back svg{width:22px;height:22px;flex:none}
+.back span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.circ{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--fg)}
+.circ svg{width:19px;height:19px}
+
+.large{font-size:clamp(32px,6vw,40px);font-weight:700;letter-spacing:-.03em;line-height:1.08;padding:6px 4px 2px;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;padding:2px 4px 16px;font-variant-numeric:tabular-nums}
+
+.field{display:flex;align-items:center;gap:8px;border-radius:14px;padding:0 10px 0 12px;height:44px;margin-bottom:22px}
+.field svg{width:17px;height:17px;color:var(--muted);flex:none}
+.field input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:17px;height:100%}
+.field input::placeholder{color:var(--muted)}
+.field input::-webkit-search-cancel-button{display:none}
+.field .x{width:22px;height:22px;border-radius:50%;background:var(--muted);color:var(--bg);display:grid;place-items:center;font-size:13px;font-weight:700;flex:none;opacity:.7}
+.field:focus-within{box-shadow:inset 0 0 0 .5px var(--glass-edge),inset 0 1px 0 var(--glass-hi),0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent),0 12px 32px -12px var(--shadow)}
+
+.section-h{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:0 16px 8px;display:flex;justify-content:space-between}
+/* home tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:26px}
+@media (min-width:620px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{border-radius:22px;padding:14px 14px 13px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;text-align:left;min-height:118px;overflow:hidden}
+.tile .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-weight:700;font-size:19px;color:#fff;letter-spacing:-.02em;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--cc) 72%,#fff),var(--cc) 55%,color-mix(in srgb,var(--cc) 75%,#000));box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 6px 14px -6px var(--cc)}
+.tile b{font-weight:600;font-size:15.5px;line-height:1.2;letter-spacing:-.015em}
+.tile small{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;margin-top:-8px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:26px}
+.duo .tile{min-height:0;flex-direction:row;align-items:center;gap:12px;padding:12px 14px}
+.duo .tile .ic{width:36px;height:36px;border-radius:11px;font-size:16px}
+.duo .tile div{display:flex;flex-direction:column;min-width:0}
+.duo .tile small{margin:0}
+
+/* grouped lists */
+.group{border-radius:18px;overflow:hidden;background:var(--material);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);box-shadow:inset 0 0 0 .5px var(--glass-edge),0 10px 30px -18px var(--shadow)}
+.row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 14px 11px 12px;position:relative;content-visibility:auto;contain-intrinsic-size:auto 62px;transition:background-color .2s}
+.row+.row::before{content:"";position:absolute;top:0;left:74px;right:0;height:.5px;background:var(--sep)}
+.row:active{background:color-mix(in srgb,var(--fg) 8%,transparent);transition-duration:0s}
+@media (hover:hover){.row:hover{background:color-mix(in srgb,var(--fg) 4%,transparent)}}
+.pill{min-width:50px;text-align:center;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;color:var(--cc);background:color-mix(in srgb,var(--cc) 14%,transparent);border-radius:8px;padding:4px 6px}
+.rt{min-width:0}
+.rt .t{font-weight:500;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rt .f{font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.rt .snip{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.chev{display:flex;align-items:center;gap:6px;color:var(--muted)}
+.chev svg{width:8px;height:14px;opacity:.6}
+.chev .star{color:var(--c-s);font-size:13px}
+mark{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px}
+.empty{padding:34px 20px;color:var(--muted);text-align:center;line-height:1.5}
+.more{display:block;margin:14px auto 0;border-radius:999px;padding:10px 18px;color:var(--accent);font-weight:500}
+.hint{color:var(--muted);font-size:13px;padding:10px 16px 0;line-height:1.5}
+
+/* reader */
+.page{padding-top:8px}
+.eyebrow{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);margin-bottom:10px;padding:0 2px}
+.badge{font-weight:700;color:#fff;background:var(--cc);border-radius:7px;padding:3px 8px;font-size:13px;font-variant-numeric:tabular-nums}
+.ptitle{font-family:var(--lyr-font,var(--f-serif));font-weight:600;font-size:clamp(28px,5vw,40px);line-height:1.12;letter-spacing:-.02em;text-wrap:balance;margin-bottom:26px;padding:0 2px}
+.verse{font-family:var(--f-serif);font-style:italic;color:var(--muted);margin:-16px 2px 26px;line-height:1.5}
+.lyrics{font-family:var(--lyr-font,var(--f-serif));font-size:var(--fs,21px);line-height:1.55;letter-spacing:0}
+.st{position:relative;margin:0 0 1.15em;padding-left:2em}
+.st .n{position:absolute;left:0;top:.18em;font-family:var(--f-ui);font-size:.6em;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.st.ch{color:var(--chorus)}
+.st.ch .n{color:var(--chorus);font-size:.5em;letter-spacing:.06em;text-transform:uppercase;top:.34em}
+.st.ch .l{font-style:italic}
+.l{display:block;padding-left:1em;text-indent:-1em}
+.st .part{display:block;font-family:var(--f-ui);font-size:.55em;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.2em}
+.st.src{font-family:var(--f-ui);font-size:.62em;color:var(--muted);margin-top:2em}
+.pnav{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:36px}
+.pnav a{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:16px;min-width:0}
+.pnav a.r{text-align:right;grid-column:2}
+.pnav small{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pnav span{font-weight:500;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-link{margin-top:22px;font-size:12.5px;color:var(--muted);text-align:center}
+.src-link a{text-decoration:underline;text-decoration-color:var(--sep)}
+
+/* floating toolbar */
+.toolbar{position:absolute;z-index:25;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;gap:2px;padding:6px;border-radius:999px;transition:transform .5s var(--spring),opacity .3s}
+.toolbar.hide{transform:translate(-50%,calc(100% + 40px));opacity:0}
+.tb{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:var(--fg);position:relative;z-index:1}
+.tb svg{width:21px;height:21px}
+.tb:disabled{opacity:.3;cursor:default}
+.tb[aria-pressed="true"]{color:var(--c-s)}
+.tb[aria-pressed="true"] svg{fill:currentColor}
+.tb.aa{font-family:var(--f-serif);font-weight:600;font-size:18px}
+.tbsep{width:.5px;background:var(--sep);margin:8px 4px}
+@media (hover:hover){.tb:hover{background:color-mix(in srgb,var(--fg) 7%,transparent)}}
+
+/* sheet */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .4s}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;z-index:41;left:50%;bottom:0;width:min(520px,100%);transform:translate(-50%,105%);border-radius:28px 28px 0 0;padding:10px max(20px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));transition:transform .55s var(--spring);background:var(--glass-strong)}
+.sheet.on{transform:translate(-50%,0)}
+@media (min-width:700px){.sheet{bottom:24px;border-radius:28px;transform:translate(-50%,calc(100% + 40px))}.sheet.on{transform:translate(-50%,0)}}
+.grab{width:38px;height:5px;border-radius:3px;background:var(--sep);margin:0 auto 12px}
+.sheet-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sheet-h b{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.done{color:var(--accent);font-weight:600;font-size:17px;padding:6px 4px}
+.opt{margin-bottom:18px;position:relative;z-index:1}
+.opt label{display:block;font-size:13px;color:var(--muted);font-weight:500;margin:0 4px 8px}
+.slider{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:14px;background:color-mix(in srgb,var(--fg) 6%,transparent)}
+.slider span{color:var(--muted);font-family:var(--f-serif)}
+.slider output{min-width:30px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:28px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--pct,40%),var(--sep) var(--pct,40%))}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:var(--sep)}
+input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--accent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;border-radius:50%;background:#fff;margin-top:-12px;box-shadow:0 2px 8px rgba(0,0,0,.2),0 0 0 .5px rgba(0,0,0,.06)}
+input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:0;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.seg{display:flex;padding:3px;border-radius:12px;background:color-mix(in srgb,var(--fg) 7%,transparent);position:relative}
+.seg button{flex:1;padding:8px 4px;border-radius:9px;font-size:14px;font-weight:500;position:relative;z-index:1;transition:color .2s}
+.seg .thumb{position:absolute;top:3px;bottom:3px;border-radius:9px;background:var(--glass-strong);box-shadow:0 2px 8px -2px var(--shadow),inset 0 0 0 .5px var(--glass-edge);transition:left .45s var(--spring),width .45s var(--spring)}
+:root[data-theme="light"] .seg .thumb,:root:not([data-theme]) .seg .thumb{background:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg .thumb{background:#636366}}
+:root[data-theme="dark"] .seg .thumb{background:#636366}
+
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translate(-50%,-220%);visibility:hidden;z-index:60;padding:10px 18px;border-radius:999px;font-size:15px;font-weight:500;pointer-events:none;transition:transform .5s var(--spring),visibility 0s .5s;background:var(--glass-strong)}
+.toast.on{transform:translate(-50%,0);visibility:visible;transition:transform .5s var(--spring),visibility 0s}
+
+/* present mode */
+.present{position:fixed;inset:0;z-index:70;background:#000;color:#fff;display:flex;flex-direction:column;user-select:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0}}
+.present .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:4vh 5vw;min-height:0;overflow:hidden}
+.present .slide{font-family:var(--lyr-font,var(--f-serif));line-height:1.35;text-align:center}
+.present .slide.ch{color:#f0c8ff;font-style:italic}
+.present .slide .l{display:block;padding-left:0;text-indent:0}
+.present .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 20px 14px;color:#8b93a3;font-size:14px}
+.present .foot button{border:1px solid #333;color:#c9ced8;border-radius:999px;padding:7px 14px}
+.present .dots{display:flex;gap:6px}
+.present .dots i{width:7px;height:7px;border-radius:50%;background:#3a3f4a;transition:background .3s,transform .3s}
+.present .dots i.on{background:#fff;transform:scale(1.25)}
+
+@media (prefers-reduced-motion:reduce){
+  .screen,.screen::after,.toolbar,.sheet,.toast,.press,.seg .thumb{transition-duration:.01s!important}
+  .screen::before{animation:none}
+}
+</style>
+
+<!-- HOME -->
+<section class="screen active" id="sHome" aria-label="Сборники">
+  <header class="nav"><div class="nav-in">
+    <div class="nav-l"></div>
+    <div class="nav-title">Сборник псалмов</div>
+    <div class="nav-r"><button class="circ glass press" id="themeBtn" aria-label="Шрифт, размер и тема"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button></div>
+  </div></header>
+  <div class="scroller"><div class="content">
+    <h1 class="large">Сборник псалмов</h1>
+    <p class="sub" id="total">Загрузка…</p>
+    <label class="field glass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="qHome" type="search" autocomplete="off" spellcheck="false" placeholder="Поиск по всем сборникам" aria-label="Поиск по всем сборникам" enterkeyhint="search">
+      <button class="x" id="xHome" hidden aria-label="Очистить">×</button></label>
+    <div id="homeBody"></div>
+  </div></div>
+</section>
+
+<!-- COLLECTION -->
+<section class="screen right" id="sList" aria-label="Список" inert>
+  <header class="nav"><div class="nav-in">
+    <div class="nav-l"><button class="back press" id="backList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg><span>Сборники</span></button></div>
+    <div class="nav-title" id="listNavTitle"></div>
+    <div class="nav-r"></div>
+  </div></header>
+  <div class="scroller"><div class="content">
+    <h1 class="large" id="listTitle"></h1>
+    <p class="sub" id="listSub"></p>
+    <label class="field glass"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="qList" type="search" autocomplete="off" spellcheck="false" placeholder="Номер или название" aria-label="Поиск в сборнике" enterkeyhint="search">
+      <button class="x" id="xList" hidden aria-label="Очистить">×</button></label>
+    <div id="listBody"></div>
+  </div></div>
+</section>
+
+<!-- PSALM -->
+<section class="screen right" id="sRead" aria-label="Псалом" inert>
+  <header class="nav"><div class="nav-in">
+    <div class="nav-l"><button class="back press" id="backRead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg><span id="backReadLabel"></span></button></div>
+    <div class="nav-title" id="readNavTitle"></div>
+    <div class="nav-r"><button class="circ glass press" id="presentBtn" aria-label="Показ на экране (P)" title="Показ на экране (P)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></button></div>
+  </div></header>
+  <div class="scroller" id="readScroll"><div class="content" id="readBody"></div></div>
+  <div class="toolbar glass" id="toolbar">
+    <button class="tb press" id="prevBtn" aria-label="Предыдущий псалм"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg></button>
+    <span class="tbsep"></span>
+    <button class="tb press" id="favBtn" aria-label="В избранное (F)" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></button>
+    <button class="tb aa press" id="setBtn" aria-label="Шрифт и размер">Aa</button>
+    <button class="tb press" id="copyBtn" aria-label="Копировать текст"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button>
+    <span class="tbsep"></span>
+    <button class="tb press" id="nextBtn" aria-label="Следующий псалм"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg></button>
   </div>
+</section>
 
-  <script>
-    // Lade Psalmen-Daten mit Lazy Loading
-    let collectionsData = {};
-    let currentCollection = null;
-    let currentPsalm = null;
+<!-- SETTINGS SHEET -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet glass" id="sheet" role="dialog" aria-label="Настройки текста" aria-hidden="true" inert>
+  <div class="grab"></div>
+  <div class="sheet-h"><b>Текст и тема</b><button class="done" id="doneBtn">Готово</button></div>
+  <div class="opt"><label for="fsRange">Размер шрифта</label>
+    <div class="slider"><span style="font-size:14px">A</span><input type="range" id="fsRange" min="14" max="48" step="1"><span style="font-size:22px">A</span><output id="fsOut">21</output></div></div>
+  <div class="opt"><label>Шрифт</label>
+    <div class="seg" id="fontSeg"><span class="thumb"></span>
+      <button data-v="serif" style="font-family:var(--f-serif)">С засечками</button>
+      <button data-v="pt" style="font-family:'PT Serif',serif">PT Serif</button>
+      <button data-v="sans">Без засечек</button></div></div>
+  <div class="opt" style="margin-bottom:0"><label>Оформление</label>
+    <div class="seg" id="themeSeg"><span class="thumb"></span>
+      <button data-v="auto">Авто</button><button data-v="light">Светлое</button><button data-v="dark">Тёмное</button></div></div>
+</div>
 
-    async function loadCollectionData(abbr) {
-      if (collectionsData[abbr]) {
-        return collectionsData[abbr];
-      }
+<div class="present" id="present" hidden>
+  <div class="stage" id="stage"><div class="slide" id="slide"></div></div>
+  <div class="foot"><span id="pInfo"></span><span class="dots" id="pDots"></span><button id="pClose">Закрыть · Esc</button></div>
+</div>
+<div class="toast glass" id="toast"></div>
 
-      try {
-        const response = await fetch(`psalms-split/${abbr}.json.gz`);
-        if (!response.ok) throw new Error('Failed to load');
-        
-        const buffer = await response.arrayBuffer();
-        const decompressed = await decompressGzip(buffer);
-        const text = new TextDecoder().decode(decompressed);
-        const data = JSON.parse(text);
-        
-        collectionsData[abbr] = data.psalms;
-        return data.psalms;
-      } catch (err) {
-        console.error(`Fehler beim Laden von ${abbr}:`, err);
-        showError(`Fehler beim Laden der Sammlung`);
-        return [];
-      }
-    }
+<script>
+const COLS=[
+  {c:"к",a:"k",name:"Кувшинчик"},{c:"н",a:"n",name:"Новые псалмы"},{c:"г",a:"g",name:"Горлица"},
+  {c:"п",a:"p",name:"Песни Юности"},{c:"с",a:"s",name:"Псалмы Сиона"},{c:"м",a:"m",name:"Мы поём Господу"},
+  {c:"юс",a:"ys",name:"Мелодия юных сердец"},{c:"гх",a:"gh",name:"Голосок хваления"}];
+const BY_C=Object.fromEntries(COLS.map(x=>[x.c,x])), BY_A=Object.fromEntries(COLS.map(x=>[x.a,x]));
+const SRC="https://functions.yandexcloud.net/d4e02omtu989a7khj11n?psal=";
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem("ps."+k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem("ps."+k,JSON.stringify(v))}catch{}}};
 
-    // Gzip Decompression
-    async function decompressGzip(buffer) {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new Uint8Array(buffer));
-          controller.close();
-        }
-      });
-      
-      const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
-      const reader = decompressedStream.getReader();
-      const chunks = [];
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-      }
-      
-      const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-      const result = new Uint8Array(totalLength);
-      let offset = 0;
-      
-      for (const chunk of chunks) {
-        result.set(chunk, offset);
-        offset += chunk.length;
-      }
-      
-      return result;
-    }
+let INDEX=[];const BYKEY=new Map();const TEXTS={};const textLoads={};
+let favs=new Set(store.get("favs",[])), recent=store.get("recent",[]);
+let settings=Object.assign({fs:21,font:"serif",theme:"auto"},store.get("settings",{}));
+if(!["serif","pt","sans"].includes(settings.font))settings.font="serif";
+const S={depth:0,list:null,from:"list",cur:null,limitHome:150,limitList:300};
 
-    function showScreen(screenId) {
-      document.querySelectorAll('.collections-screen, .psalms-screen, .detail-screen').forEach(el => {
-        el.classList.remove('active');
-      });
-      document.getElementById(screenId).classList.add('active');
-    }
+const norm=s=>s.toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9 ]+/g," ").replace(/\s+/g," ").trim();
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const key=(c,n)=>c+n, hashOf=(c,n)=>"#"+BY_C[c].a+n;
+const label=(c,n)=>c.charAt(0).toUpperCase()+c.slice(1)+n;
+const plural=(n,a,b,c)=>{const m=n%10,h=n%100;return n+" "+(m===1&&h!==11?a:m>=2&&m<=4&&(h<10||h>=20)?b:c)};
+const psalmsWord=n=>plural(n,"псалом","псалма","псалмов");
 
-    async function renderPsalmsList(abbr, filter = '') {
-      const psalmsList = document.getElementById('psalmsList');
-      psalmsList.innerHTML = '<div class="loading"><div class="loading-spinner"></div> Загрузка...</div>';
+/* ---------- data ---------- */
+async function loadIndex(){
+  const rows=await (await fetch("data/index.json")).json();
+  INDEX=rows.map(([c,n,t,f,sub=""])=>({c,n,t,f,sub,key:key(c,n),norm:norm(t+" "+f+" "+sub)}));
+  INDEX.forEach(p=>BYKEY.set(p.key,p));
+  $("total").textContent=INDEX.length.toLocaleString("ru")+" псалмов · 8 сборников";
+}
+function loadTexts(c){
+  if(TEXTS[c])return Promise.resolve(TEXTS[c]);
+  return textLoads[c]??=fetch("data/"+BY_C[c].a+".json").then(r=>r.json()).then(j=>{TEXTS[c]=j;for(const n in j){const p=BYKEY.get(c+n);if(p)p.full=norm(j[n])}return j});
+}
+let allLoaded=null;const loadAll=()=>allLoaded??=Promise.all(COLS.map(x=>loadTexts(x.c)));
 
-      const psalms = await loadCollectionData(abbr);
-      
-      const filtered = filter.trim() === '' ? psalms : psalms.filter(p => {
-        const query = filter.toLowerCase();
-        return p.number.toString().includes(query) || p.title.toLowerCase().includes(query);
-      });
+/* ---------- text parsing ---------- */
+const MARK=/^\s*(\d+)\s*[.)]\s*/, CHORUS=/^\s*(пр|припев|хор|рефрен)\s*[.:]+\s*/i, PART=/^\s*(соло|дуэт|бридж|запев|концовка|кода|окончание)\s*[.:]+\s*/i, SRCLINE=/^\s*\((гусли|тимпаны|кимвалы|сб\.|нотн)/i;
+function parse(text){
+  let lines=text.replace(/\r/g,"").split("\n");
+  while(lines.length&&(/^\s*$/.test(lines[0])||/^\s*псалом\s+\S+\s*$/i.test(lines[0])))lines.shift();
+  if(lines.length&&/^\s*[А-ЯЁа-яё]{1,2}\s*\d+\s*\.?/.test(lines[0]))lines.shift();
+  const st=[];let cur=null;const start=(kind,n)=>{cur={kind,n,lines:[]};st.push(cur)};
+  for(const raw of lines){
+    const l=raw.replace(/\s+$/,"");if(!l.trim()){cur=null;continue}
+    let m;
+    if(SRCLINE.test(l)){st.push({kind:"src",n:"",lines:[l.trim()]});cur=null;continue}
+    if((m=l.match(CHORUS))){start("ch","Пр.");const r=l.slice(m[0].length).trim();if(r)cur.lines.push(r);continue}
+    if((m=l.match(PART))){start("v",m[1].toLowerCase());const r=l.slice(m[0].length).trim();if(r)cur.lines.push(r);continue}
+    if((m=l.match(MARK))&&l.length>m[0].length){start("v",m[1]);cur.lines.push(l.slice(m[0].length));continue}
+    if(!cur)start("v","");cur.lines.push(l.trim());
+  }
+  return st.filter(s=>s.lines.length);
+}
+const isNum=s=>/^\d+$/.test(s);
+function stanzaHTML(s){
+  const lines=s.lines.map(l=>`<span class="l">${esc(l)}</span>`).join("");
+  if(s.kind==="src")return `<div class="st src">${lines}</div>`;
+  const mark=s.kind==="ch"?`<span class="n">Пр.</span>`:isNum(s.n)?`<span class="n">${s.n}</span>`:"";
+  const part=s.n&&!isNum(s.n)&&s.kind!=="ch"?`<span class="part">${esc(s.n)}</span>`:"";
+  return `<div class="st ${s.kind==="ch"?"ch":""}">${mark}${part}${lines}</div>`;
+}
+function plain(p,text){return label(p.c,p.n)+". "+p.t+"\n\n"+parse(text).map(s=>(s.kind==="ch"?"Припев:\n":s.kind==="src"?"":isNum(s.n)?s.n+". ":s.n?s.n[0].toUpperCase()+s.n.slice(1)+":\n":"")+s.lines.join("\n")).join("\n\n")}
 
-      psalmsList.innerHTML = '';
+/* ---------- search ---------- */
+function search(items,raw){
+  raw=raw.trim();if(!raw)return {items};
+  const q=norm(raw);
+  const m=q.match(/^(юс|гх|к|н|г|п|с|м)\s*(\d+)$/);
+  if(m){const p=BYKEY.get(m[1]+(+m[2]));return {items:p?[p]:[]}}
+  if(/^\d+$/.test(q)){const n=+q;return {items:items.filter(p=>p.n===n).concat(items.filter(p=>p.n!==n&&String(p.n).startsWith(q)))}}
+  const words=q.split(" ").filter(Boolean),scored=[];
+  for(const p of items){
+    let s=0;const tn=norm(p.t);
+    if(words.every(w=>p.norm.includes(w)))s=tn.startsWith(q)?100:tn.includes(q)?80:p.norm.includes(q)?60:40;
+    else if(p.full&&words.every(w=>p.full.includes(w)))s=p.full.includes(q)?20:10;
+    if(s)scored.push([s,p]);
+  }
+  scored.sort((a,b)=>b[0]-a[0]);
+  return {items:scored.map(x=>x[1]),words,scores:scored.map(x=>x[0])};
+}
+function hl(s,words){let out=esc(s);for(const w of words||[]){if(w.length<2)continue;const re=new RegExp("("+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&").replace(/е/g,"[её]")+")","gi");out=out.replace(re,"<mark>$1</mark>")}return out}
+function snippet(text,words){const flat=text.replace(/\s*\n\s*/g," / ");const low=flat.toLowerCase().replace(/ё/g,"е");const i=low.indexOf(words[0]);if(i<0)return null;const s=Math.max(0,i-40);return (s?"…":"")+flat.slice(s,i+110)+"…"}
+const CHEV='<svg viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m1 1 6 6-6 6"/></svg>';
+function rowsHTML(res,limit,from){
+  const {items,words=[],scores=[]}=res;
+  return items.slice(0,limit).map((p,i)=>{
+    let sub=words.length?hl(p.f,words):esc(p.f);
+    if(words.length&&scores[i]<=20&&TEXTS[p.c]){const sn=snippet(TEXTS[p.c][p.n],words);if(sn)sub=`<span class="snip">${hl(sn,words)}</span>`}
+    return `<a class="row" href="${hashOf(p.c,p.n)}" data-from="${from}" style="--cc:var(--c-${BY_C[p.c].a})"><span class="pill">${label(p.c,p.n)}</span><span class="rt"><div class="t">${words.length?hl(p.t,words):esc(p.t)}</div><div class="f">${sub}</div></span><span class="chev">${favs.has(p.key)?'<span class="star">★</span>':""}${CHEV}</span></a>`}).join("");
+}
+const textsReady=()=>COLS.every(x=>TEXTS[x.c]);
 
-      if (filtered.length === 0) {
-        psalmsList.innerHTML = '<div class="error">Ничего не найдено</div>';
-        return;
-      }
+/* ---------- home ---------- */
+function renderHome(){
+  const q=$("qHome").value;
+  if(!q.trim()){
+    $("homeBody").innerHTML=`
+      <div class="duo">
+        <a class="tile glass press" href="#fav" style="--cc:var(--c-s)"><span class="ic">★</span><div><b>Избранное</b><small>${psalmsWord(favs.size)}</small></div></a>
+        <a class="tile glass press" href="#recent" style="--cc:var(--accent)"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><div><b>Недавние</b><small>${psalmsWord(recent.length)}</small></div></a>
+      </div>
+      <div class="section-h"><span>Сборники</span></div>
+      <div class="tiles">${COLS.map(x=>`<a class="tile glass press" href="#${x.a}" style="--cc:var(--c-${x.a})"><span class="ic">${x.c}</span><b>${x.name}</b><small>${psalmsWord(INDEX.filter(p=>p.c===x.c).length)}</small></a>`).join("")}</div>
+      <p class="hint">Введите <b>н5</b> или <b>юс 120</b>, чтобы сразу открыть псалом. Строчку из куплета можно искать по всем сборникам.</p>`;
+    return;
+  }
+  const res=search(INDEX,q);
+  const head=`<div class="section-h"><span>Результаты</span><span>${res.items.length}${textsReady()?"":" · ищу в текстах…"}</span></div>`;
+  $("homeBody").innerHTML=head+(res.items.length?`<div class="group">${rowsHTML(res,S.limitHome,"home")}</div>${res.items.length>S.limitHome?`<button class="more press" data-more="home">Показать ещё</button>`:""}`:`<div class="group"><div class="empty">Ничего не найдено</div></div>`);
+}
 
-      filtered.forEach(psalm => {
-        const item = document.createElement('div');
-        item.className = 'psalm-item';
-        item.innerHTML = `
-          <div class="psalm-info">
-            <div class="psalm-number">${psalm.collection}${psalm.number}</div>
-            <div class="psalm-title">${psalm.title}</div>
-          </div>
-          <div class="psalm-arrow">›</div>
-        `;
-        item.addEventListener('click', () => showPsalmDetail(psalm));
-        psalmsList.appendChild(item);
-      });
-    }
+/* ---------- list ---------- */
+function listItems(id){
+  if(id==="fav")return INDEX.filter(p=>favs.has(p.key));
+  if(id==="recent")return recent.map(k=>BYKEY.get(k)).filter(Boolean);
+  return INDEX.filter(p=>p.c===BY_A[id].c);
+}
+const listName=id=>id==="fav"?"Избранное":id==="recent"?"Недавние":BY_A[id].name;
+function renderList(){
+  const id=S.list;if(!id)return;
+  const all=listItems(id),q=$("qList").value,res=search(all,q);
+  $("listTitle").textContent=$("listNavTitle").textContent=listName(id);
+  $("listSub").textContent=q.trim()?`Найдено: ${res.items.length}`:psalmsWord(all.length);
+  let html;
+  if(!res.items.length){
+    html=`<div class="group"><div class="empty">${!q.trim()&&id==="fav"?"Пока пусто. Нажмите ☆ под открытым псалмом, чтобы добавить его сюда.":!q.trim()&&id==="recent"?"Здесь появятся псалмы, которые вы открывали.":"Ничего не найдено"}</div></div>`;
+  }else html=`<div class="group">${rowsHTML(res,S.limitList,"list")}</div>${res.items.length>S.limitList?`<button class="more press" data-more="list">Показать ещё</button>`:""}`;
+  $("listBody").innerHTML=html;
+}
 
-    function showPsalmDetail(psalm) {
-      currentPsalm = psalm;
-      document.getElementById('detailTitle').textContent = psalm.title;
-      document.getElementById('detailNumber').textContent = `${psalm.collection}${psalm.number}`;
-      document.getElementById('detailText').textContent = psalm.text;
-      showScreen('detailScreen');
-    }
+/* ---------- navigation stack ---------- */
+const SCREENS=[$("sHome"),$("sList"),$("sRead")];
+function go(depth){
+  const path=depth===2&&S.from==="home"?[0,2]:[0,1,2].slice(0,depth+1);
+  SCREENS.forEach((el,i)=>{
+    const pos=i===depth?"active":(path.includes(i)&&i<depth)?"under":"right";
+    const was=el.dataset.pos||"right";
+    if(was==="right"&&pos==="under"||was==="under"&&pos==="right"){el.style.transition="none";requestAnimationFrame(()=>requestAnimationFrame(()=>el.style.transition=""))}
+    el.classList.remove("active","under","right");el.classList.add(pos);el.dataset.pos=pos;
+    el.style.transform="";
+    el.inert=i!==depth;
+  });
+  S.depth=depth;
+}
+function route(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  let m;
+  if((m=h.match(/^([a-z]+)(\d+)$/))&&BY_A[m[1]]&&BYKEY.get(key(BY_A[m[1]].c,+m[2]))){
+    const c=BY_A[m[1]].c,n=+m[2];
+    if(S.depth<2&&S.pendingFrom)S.from=S.pendingFrom;
+    else if(S.depth<2&&S.depth===0&&!S.pendingFrom)S.from="list";
+    S.pendingFrom=null;
+    if(S.from==="list"&&(!S.list||(S.list!=="fav"&&S.list!=="recent"&&BY_A[S.list].c!==c))){S.list=BY_C[c].a;$("qList").value="";$("xList").hidden=true;renderList()}
+    openPsalm(c,n);go(2);return;
+  }
+  if(h==="fav"||h==="recent"||BY_A[h]){
+    if(S.list!==h){S.list=h;$("qList").value="";$("xList").hidden=true;S.limitList=300;renderList();$("sList").querySelector(".scroller").scrollTop=0;$("sList").classList.remove("scrolled")}
+    else if(h==="recent"||h==="fav")renderList();
+    document.title=listName(h);go(1);return;
+  }
+  renderHome();document.title="Сборник псалмов";go(0);
+}
+function goBack(){
+  if(S.depth===2)location.hash=S.from==="home"?"home":S.list;
+  else if(S.depth===1)location.hash="home";
+}
+$("backList").onclick=goBack;$("backRead").onclick=goBack;
+document.addEventListener("click",e=>{const a=e.target.closest("a.row");if(a)S.pendingFrom=a.dataset.from});
 
-    function copyToClipboard() {
-      if (!currentPsalm) return;
-      const text = `${currentPsalm.collection}${currentPsalm.number}. ${currentPsalm.title}\n\n${currentPsalm.text}`;
-      navigator.clipboard.writeText(text).then(() => {
-        showToast('✅ Копировано!');
-      }).catch(err => {
-        console.error('Ошибка при копировании:', err);
-      });
-    }
+/* ---------- reader ---------- */
+function applySettings(){
+  const r=document.documentElement;
+  r.style.setProperty("--fs",settings.fs+"px");
+  r.style.setProperty("--lyr-font",{serif:'ui-serif,"New York","Literata",Georgia,serif',pt:'"PT Serif",Georgia,serif',sans:'-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif'}[settings.font]);
+  if(settings.theme==="auto")delete r.dataset.theme;else r.dataset.theme=settings.theme;
+  $("fsRange").value=settings.fs;$("fsOut").textContent=settings.fs;
+  $("fsRange").style.setProperty("--pct",((settings.fs-14)/(48-14)*100)+"%");
+  setSeg("fontSeg",settings.font);setSeg("themeSeg",settings.theme);
+  store.set("settings",settings);
+}
+function setSeg(id,v){const seg=$(id),b=seg.querySelector(`button[data-v="${v}"]`),t=seg.querySelector(".thumb");if(!b)return;
+  seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));t.style.left=b.offsetLeft+"px";t.style.width=b.offsetWidth+"px"}
+function neighbors(p){const arr=S.from==="list"&&(S.list==="fav"||S.list==="recent")?listItems(S.list):INDEX.filter(x=>x.c===p.c);const i=arr.findIndex(x=>x.key===p.key);return [arr[i-1],arr[i+1]]}
+let renderToken=0;
+async function openPsalm(c,n){
+  const p=BYKEY.get(key(c,n));const prevKey=S.cur;S.cur=p.key;const tok=++renderToken;
+  const col=BY_C[c];
+  $("backReadLabel").textContent=S.from==="home"?"Сборники":listName(S.list);
+  $("readNavTitle").textContent=label(c,n)+" · "+p.t;
+  $("favBtn").setAttribute("aria-pressed",favs.has(p.key));
+  document.title=label(c,n)+". "+p.t;
+  const texts=TEXTS[c]||await loadTexts(c);if(tok!==renderToken)return;
+  const st=parse(texts[n]||"");const [prev,next]=neighbors(p);
+  $("prevBtn").disabled=!prev;$("nextBtn").disabled=!next;
+  const html=`<article class="page" style="--cc:var(--c-${col.a})">
+    <div class="eyebrow"><span class="badge">${label(c,n)}</span><span>${col.name}</span></div>
+    <h2 class="ptitle">${esc(p.t)}</h2>${p.sub?`<p class="verse">${esc(p.sub)}</p>`:""}
+    <div class="lyrics">${st.map(stanzaHTML).join("")}</div>
+    <nav class="pnav">${prev?`<a class="glass press" href="${hashOf(prev.c,prev.n)}"><small>‹ ${label(prev.c,prev.n)}</small><span>${esc(prev.t)}</span></a>`:""}${next?`<a class="r glass press" href="${hashOf(next.c,next.n)}"><small>${label(next.c,next.n)} ›</small><span>${esc(next.t)}</span></a>`:""}</nav>
+    <div class="src-link"><a href="${SRC+encodeURIComponent(c+n)}" target="_blank" rel="noopener">Источник: ${label(c,n)}</a></div>
+  </article>`;
+  const body=$("readBody"),sc=$("readScroll");
+  const swap=S.depth===2&&prevKey&&prevKey!==p.key&&!matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(swap){
+    const pp=BYKEY.get(prevKey),dir=(pp.c===p.c?(p.n>pp.n?1:-1):1);
+    await body.animate([{opacity:1,transform:"none"},{opacity:0,transform:`translateX(${-dir*36}px)`}],{duration:150,easing:"ease-in"}).finished.catch(()=>{});
+    if(tok!==renderToken)return;
+    body.innerHTML=html;sc.scrollTop=0;
+    body.animate([{opacity:0,transform:`translateX(${dir*36}px)`},{opacity:1,transform:"none"}],{duration:380,easing:"cubic-bezier(.32,.72,0,1)"});
+  }else{body.innerHTML=html;sc.scrollTop=0}
+  $("sRead").classList.remove("scrolled");$("toolbar").classList.remove("hide");
+  recent=[p.key,...recent.filter(k=>k!==p.key)].slice(0,50);store.set("recent",recent);
+  keepAwake();
+}
+function step(d){if(!S.cur)return;const [a,b]=neighbors(BYKEY.get(S.cur));const t=d<0?a:b;if(t)location.hash=hashOf(t.c,t.n)}
+$("prevBtn").onclick=()=>step(-1);$("nextBtn").onclick=()=>step(1);
+let wake=null;async function keepAwake(){try{if(!wake&&navigator.wakeLock){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>wake=null)}}catch{}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.depth===2)keepAwake()});
 
-    function showError(message) {
-      const content = document.querySelector('.content');
-      const error = document.createElement('div');
-      error.className = 'error';
-      error.textContent = message;
-      content.insertBefore(error, content.firstChild);
-    }
+/* large title collapse + toolbar hide on scroll */
+SCREENS.forEach(el=>{const sc=el.querySelector(".scroller");let last=0;
+  sc.addEventListener("scroll",()=>{const y=sc.scrollTop;el.classList.toggle("scrolled",y>(el.id==="sRead"?90:44));
+    if(el.id==="sRead"){const tb=$("toolbar");if(y>last+6&&y>120)tb.classList.add("hide");else if(y<last-6||y<60)tb.classList.remove("hide");if(sc.scrollHeight-y-sc.clientHeight<40)tb.classList.remove("hide")}last=y},{passive:true})});
+$("readScroll").addEventListener("click",e=>{if(!e.target.closest("a,button"))$("toolbar").classList.remove("hide")});
 
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'toast';
-      toast.textContent = message;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 2000);
-    }
+/* ---------- edge swipe back (interactive) + psalm swipe ---------- */
+let sw=null;
+document.addEventListener("touchstart",e=>{if(S.depth===0||!$("present").hidden||$("sheet").classList.contains("on"))return;const t=e.touches[0];
+  sw={x:t.clientX,y:t.clientY,t:Date.now(),edge:t.clientX<28,dx:0,lock:null}},{passive:true});
+document.addEventListener("touchmove",e=>{if(!sw)return;const t=e.touches[0];sw.dx=t.clientX-sw.x;const dy=t.clientY-sw.y;
+  if(sw.lock==null&&(Math.abs(sw.dx)>8||Math.abs(dy)>8))sw.lock=Math.abs(sw.dx)>Math.abs(dy)*1.2?"x":"y";
+  if(sw.edge&&sw.lock==="x"){const top=SCREENS[S.depth],under=SCREENS[S.depth===2&&S.from==="home"?0:S.depth-1];const dx=Math.max(0,sw.dx),w=innerWidth;
+    top.style.transition=under.style.transition="none";top.style.transform=`translateX(${dx}px)`;under.style.transform=`translateX(${-28+28*dx/w}%)`}},{passive:true});
+document.addEventListener("touchend",()=>{if(!sw)return;const s=sw;sw=null;const top=SCREENS[S.depth],under=SCREENS[S.depth===2&&S.from==="home"?0:S.depth-1];
+  if(s.edge&&s.lock==="x"){top.style.transition=under.style.transition="";const v=s.dx/(Date.now()-s.t);
+    if(s.dx>innerWidth*.33||v>.5){top.style.transform=under.style.transform="";goBack()}else{top.style.transform="";under.style.transform=""}return}
+  if(S.depth===2&&s.lock==="x"&&Math.abs(s.dx)>70)step(s.dx>0?-1:1)});
 
-    // Event Listeners
-    document.querySelectorAll('.collection-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const abbr = card.dataset.collection;
-        currentCollection = abbr;
-        renderPsalmsList(abbr);
-        showScreen('psalmsScreen');
-      });
-    });
+/* ---------- sheet ---------- */
+function openSheet(){$("sheet").classList.add("on");$("sheet").inert=false;$("sheet").setAttribute("aria-hidden","false");$("scrim").classList.add("on");requestAnimationFrame(()=>{setSeg("fontSeg",settings.font);setSeg("themeSeg",settings.theme)})}
+function closeSheet(){$("sheet").classList.remove("on");$("sheet").inert=true;$("sheet").setAttribute("aria-hidden","true");$("scrim").classList.remove("on")}
+$("setBtn").onclick=openSheet;$("themeBtn").onclick=openSheet;$("doneBtn").onclick=closeSheet;$("scrim").onclick=closeSheet;
+$("fsRange").oninput=e=>{settings.fs=+e.target.value;applySettings()};
+$("fontSeg").onclick=e=>{const b=e.target.closest("button");if(b){settings.font=b.dataset.v;applySettings()}};
+$("themeSeg").onclick=e=>{const b=e.target.closest("button");if(b){settings.theme=b.dataset.v;applySettings()}};
 
-    document.getElementById('backFromPsalms').addEventListener('click', () => {
-      showScreen('collectionsScreen');
-    });
+/* ---------- actions ---------- */
+let toastT;function toast(t){const el=$("toast");el.textContent=t;el.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("on"),1700)}
+function toggleFav(){if(!S.cur)return;favs.has(S.cur)?favs.delete(S.cur):favs.add(S.cur);store.set("favs",[...favs]);const on=favs.has(S.cur);$("favBtn").setAttribute("aria-pressed",on);
+  $("favBtn").animate([{transform:"scale(1)"},{transform:"scale(1.3)"},{transform:"scale(1)"}],{duration:420,easing:"cubic-bezier(.32,.72,0,1)"});toast(on?"Добавлено в избранное":"Убрано из избранного");if(S.list==="fav")renderList()}
+$("favBtn").onclick=toggleFav;
+$("copyBtn").onclick=()=>{const p=BYKEY.get(S.cur);if(!p||!TEXTS[p.c])return;const t=plain(p,TEXTS[p.c][p.n]);
+  const fallback=()=>{const r=document.createRange();r.selectNodeContents(document.querySelector(".lyrics"));getSelection().removeAllRanges();getSelection().addRange(r);toast("Текст выделен — скопируйте его")};
+  try{navigator.clipboard.writeText(t).then(()=>toast("Текст скопирован"),fallback)}catch{fallback()}};
 
-    document.getElementById('psalmSearch').addEventListener('input', (e) => {
-      if (currentCollection) {
-        renderPsalmsList(currentCollection, e.target.value);
-      }
-    });
+/* glass highlight follows the pointer */
+document.addEventListener("pointermove",e=>{const g=e.target.closest&&e.target.closest(".glass");if(!g)return;const r=g.getBoundingClientRect();g.style.setProperty("--mx",((e.clientX-r.left)/r.width*100)+"%");g.style.setProperty("--my",((e.clientY-r.top)/r.height*100)+"%")},{passive:true});
 
-    document.getElementById('copyButton').addEventListener('click', copyToClipboard);
-    document.getElementById('backFromDetail').addEventListener('click', () => {
-      renderPsalmsList(currentCollection);
-      showScreen('psalmsScreen');
-    });
-    document.getElementById('backFromDetail2').addEventListener('click', () => {
-      renderPsalmsList(currentCollection);
-      showScreen('psalmsScreen');
-    });
-  </script>
+/* search inputs */
+function bindSearch(inp,x,render,scrollEl,limitKey,def){let t;
+  inp.addEventListener("input",()=>{x.hidden=!inp.value;S[limitKey]=def;clearTimeout(t);t=setTimeout(()=>{render();scrollEl.scrollTop=0;
+    if(inp.value.trim()&&!/^\s*(юс|гх|к|н|г|п|с|м)?\s*\d+\s*$/i.test(inp.value))loadAll().then(()=>{if(inp.value.trim())render()})},90)});
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter"){const a=inp.closest(".content").querySelector(".row");if(a){S.pendingFrom=a.dataset.from;location.hash=a.getAttribute("href");inp.blur()}}else if(e.key==="Escape"){inp.value="";inp.dispatchEvent(new Event("input"));inp.blur()}});
+  x.onclick=e=>{e.preventDefault();inp.value="";inp.dispatchEvent(new Event("input"));inp.focus()};
+}
+bindSearch($("qHome"),$("xHome"),renderHome,$("sHome").querySelector(".scroller"),"limitHome",150);
+bindSearch($("qList"),$("xList"),renderList,$("sList").querySelector(".scroller"),"limitList",300);
+document.addEventListener("click",e=>{const b=e.target.closest("[data-more]");if(!b)return;if(b.dataset.more==="home"){S.limitHome+=300;renderHome()}else{S.limitList+=500;renderList()}});
+
+/* ---------- present mode ---------- */
+let P={slides:[],i:0};
+function openPresent(){const p=BYKEY.get(S.cur);if(!p||!TEXTS[p.c])return;
+  P={p,slides:[{title:true}].concat(parse(TEXTS[p.c][p.n]).filter(s=>s.kind!=="src")),i:0};$("present").hidden=false;
+  try{document.documentElement.requestFullscreen?.().catch(()=>{})}catch{}drawSlide();keepAwake()}
+function closePresent(){$("present").hidden=true;try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch{}}
+function drawSlide(){const s=P.slides[P.i],el=$("slide");
+  if(s.title){el.className="slide";el.innerHTML=`<span class="l" style="opacity:.6;font-size:.45em;font-family:var(--f-ui);letter-spacing:.02em">${label(P.p.c,P.p.n)} · ${esc(BY_C[P.p.c].name)}</span><span class="l" style="font-weight:600">${esc(P.p.t)}</span>`}
+  else{el.className="slide"+(s.kind==="ch"?" ch":"");el.innerHTML=s.lines.map(l=>`<span class="l">${esc(l)}</span>`).join("")}
+  $("pInfo").textContent=label(P.p.c,P.p.n)+" · "+P.p.t;$("pDots").innerHTML=P.slides.map((_,i)=>`<i class="${i===P.i?"on":""}"></i>`).join("");fit();
+  el.animate([{opacity:0,transform:"translateY(10px)"},{opacity:1,transform:"none"}],{duration:300,easing:"ease-out"})}
+function fit(){const stage=$("stage"),el=$("slide"),cs=getComputedStyle(stage);
+  const W=stage.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),H=stage.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  let lo=12,hi=200;while(hi-lo>1){const mid=(lo+hi)>>1;el.style.fontSize=mid+"px";(el.scrollWidth<=W&&el.offsetHeight<=H)?lo=mid:hi=mid}el.style.fontSize=lo+"px"}
+function pstep(d){const i=P.i+d;if(i<0||i>=P.slides.length)return;P.i=i;drawSlide()}
+$("stage").addEventListener("click",e=>pstep(e.clientX<innerWidth/3?-1:1));
+$("pClose").onclick=closePresent;$("presentBtn").onclick=openPresent;
+addEventListener("resize",()=>{if(!$("present").hidden)fit();setSeg("fontSeg",settings.font);setSeg("themeSeg",settings.theme)});
+document.addEventListener("fullscreenchange",()=>{if(!$("present").hidden)setTimeout(fit,60)});
+
+/* ---------- keyboard ---------- */
+document.addEventListener("keydown",e=>{
+  if(!$("present").hidden){if(["ArrowRight"," ","PageDown","ArrowDown"].includes(e.key)){e.preventDefault();pstep(1)}else if(["ArrowLeft","PageUp","ArrowUp"].includes(e.key)){e.preventDefault();pstep(-1)}else if(e.key==="Escape")closePresent();return}
+  if($("sheet").classList.contains("on")){if(e.key==="Escape")closeSheet();return}
+  if(e.target.matches("input"))return;
+  if(e.key==="/"){e.preventDefault();const i=S.depth===1?$("qList"):$("qHome");if(S.depth===2)location.hash="home";setTimeout(()=>{i.focus();i.select()},S.depth===2?500:0)}
+  else if(e.key==="Escape"||e.key==="Backspace")goBack();
+  else if(S.depth===2&&e.key==="ArrowLeft")step(-1);
+  else if(S.depth===2&&e.key==="ArrowRight")step(1);
+  else if(S.depth===2&&(e.key==="p"||e.key==="з"))openPresent();
+  else if(S.depth===2&&(e.key==="f"||e.key==="а"))toggleFav();
+});
+addEventListener("hashchange",route);
+
+(async()=>{
+  document.body.classList.add("noanim");
+  applySettings();
+  try{await loadIndex()}catch(e){$("homeBody").innerHTML='<div class="group"><div class="empty">Не удалось загрузить список псалмов. Обновите страницу.</div></div>';document.body.classList.remove("noanim");return}
+  route();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove("noanim")));
+  setTimeout(loadAll,1500);
+})();
+</script>
+
 </body>
 </html>
